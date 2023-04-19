@@ -53,7 +53,7 @@ print(links_text)
 links_url <- xpathSApply(parsed_page, "//a", xmlGetAttr, 'href')
 print(links_url)
 
-# PREGUNTA 1.4
+# PREGUNTA 1.4 & 1.5
 #Numero de veces que aparece que aparece cada enlace
 link_counts <- table(links_url)
 
@@ -112,3 +112,32 @@ for (i in 1:length(links_text)) {
 }
 
 head(tabla)
+
+#PREGUNTA 2.1
+library(ggplot2)
+
+# Añadimos una columna para indicar si la URL es absoluta o relativa
+tabla$tipo_url <- ifelse(grepl("^https?", tabla$links_url), "Absoluta", "Relativa")
+
+# Creamos el histograma usando ggplot2
+ggplot(tabla, aes(x=repeticiones)) + 
+  geom_histogram(aes(fill=tipo_url), 
+                 binwidth = 1, 
+                 position = "dodge") +
+  scale_fill_manual(values=c("#FF6666", "#66CCFF")) +
+  labs(x = "Frecuencia de aparición", y = "Número de enlaces") +
+  theme_minimal()
+
+#PREGUNTA 2.2
+# Añadir columna de enlaces internos/externos
+tabla$interno <- ifelse(grepl("https://www.mediawiki.org", tabla$links_url), "Interno", "Externo")
+
+# Calcular suma de enlaces internos y externos
+suma_interno <- sum(tabla$repeticiones[tabla$interno == "Interno"], na.rm = TRUE)
+suma_externo <- sum(tabla$repeticiones[tabla$interno == "Externo"], na.rm = TRUE)
+
+# Generar gráfico de barras
+barplot(c(suma_interno, suma_externo), names.arg = c("Enlaces internos", "Enlaces externos"),
+        xlab = "Tipo de enlace", ylab = "Frecuencia", col = c("blue", "red"))
+
+#PREGUNTA 2.3
