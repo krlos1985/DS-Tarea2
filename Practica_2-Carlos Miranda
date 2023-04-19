@@ -52,3 +52,64 @@ print(links_text)
 #URL
 links_url <- xpathSApply(parsed_page, "//a", xmlGetAttr, 'href')
 print(links_url)
+
+# PREGUNTA 1.4
+#Numero de veces que aparece que aparece cada enlace
+link_counts <- table(links_url)
+
+#Crear data.frame
+tabla <- data.frame(links_text = character(),
+                    links_url = character(),
+                    repeticiones = numeric(),
+                    scraps = character(),
+                    stringsAsFactors = FALSE)
+
+frecuencia <- table(links_url)
+
+for (i in 1:length(links_text)) {
+  Sys.sleep(4)
+  print("round done")
+  tabla[i, "links_text"] <- links_text[i]
+  tabla[i, "links_url"] <- links_url[i]
+  tabla[i, "repeticiones"] <- frecuencia[links_url[i]]
+  
+  #si inicia con /wiki/
+  validation_wiki <- startsWith(links_url[i], "/wiki/")
+  if(validation_wiki) {
+    tabla[i, "links_url"] <- paste0("https://www.mediawiki.org", links_url[i])
+  }
+  
+  #si inicia con /https/
+  validation_wiki <- startsWith(links_url[i], "https:")
+  if(validation_wiki) {
+    tabla[i, "links_url"] <- paste0("", links_url[i])
+  }
+  
+  #si inicia con //
+  validation_wiki <- startsWith(links_url[i], "//")
+  if(validation_wiki) {
+    tabla[i, "links_url"] <- paste0("https:", links_url[i])
+  }
+  
+  #si inicia con /w/
+  validation_wiki <- startsWith(links_url[i], "/w/")
+  if(validation_wiki) {
+    tabla[i, "links_url"] <- paste0("https://www.mediawiki.org", links_url[i])
+  }
+  
+  #si inicia con /#/
+  validation_wiki <- startsWith(links_url[i], "#")
+  if(validation_wiki) {
+    tabla[i, "links_url"] <- paste0("https://www.mediawiki.org/wiki/MediaWiki", links_url[i])
+  }
+  
+  print(paste0("TEST> " , links_url[i]))
+  
+  #obtencion de STATUS CODE
+  code <- status_code(HEAD(tabla[i, "links_url"]))
+  tabla[i, "scraps"] <- code
+  print(code)
+}
+
+head(tabla)
+view(tabla)
