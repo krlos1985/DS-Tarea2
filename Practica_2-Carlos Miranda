@@ -21,7 +21,7 @@ title
 
 #Ficheros de estilo
 stylesheets <- xpathSApply(parsed_page, "//link[@rel='stylesheet']/@href")
-> stylesheets
+stylesheets
 
 #Nombre del autor
 author <- xpathSApply(parsed_page, "//meta[@name='author']/@content")
