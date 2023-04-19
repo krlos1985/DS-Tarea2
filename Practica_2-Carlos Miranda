@@ -1,0 +1,41 @@
+#Instalar las librerías: HTTR y XML
+install.packages("httr")
+install.packages("XML")
+
+#Cargar las librerías: HTTR y XML
+library(httr)
+library(XML)
+
+#Definir la URL
+url <- "https://www.mediawiki.org/wiki/MediaWiki"
+
+#Descargar la página
+page <- GET(url)
+
+#Convertir el contenido HTML de la página a formato XML
+parsed_page <- htmlParse(content(page, as = "text"))
+
+#Título de la página
+title <- xpathSApply(parsed_page, "//title", xmlValue)
+title
+
+#Ficheros de estilo
+stylesheets <- xpathSApply(parsed_page, "//link[@rel='stylesheet']/@href")
+> stylesheets
+
+#Nombre del autor
+author <- xpathSApply(parsed_page, "//meta[@name='author']/@content")
+author
+
+#Descripción de la página
+description <- xpathSApply(parsed_page, "//meta[@name='description']/@content")
+description
+
+#tipo de codificación
+encoding <- xpathSApply(parsed_page, "//meta[@charset]/@charset")
+encoding
+
+#palabras clave
+keywords <- xpathSApply(parsed_page, "//meta[@name='keywords']/@content")
+keywords
+
