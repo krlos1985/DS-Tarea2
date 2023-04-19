@@ -45,4 +45,10 @@ keywords <- xpathSApply(parsed_page, "//meta[@name='keywords']/@content")
 keywords
 
 # PREGUNTA 1.3
+#Texto del enlace
+links_text <- xpathSApply(parsed_page, "//a", xmlValue)
+print(links_text)
 
+#URL
+links_url <- xpathSApply(parsed_page, "//a", xmlGetAttr, 'href')
+print(links_url)
