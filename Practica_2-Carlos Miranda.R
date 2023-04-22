@@ -1,7 +1,7 @@
 # PREGUNTA 1.1
 #Instalar las librerías: HTTR y XML
-install.packages("httr")
-install.packages("XML")
+#install.packages("httr")
+#install.packages("XML")
 
 #Cargar las librerías: HTTR y XML
 library(httr)
@@ -54,12 +54,11 @@ links_url <- xpathSApply(parsed_page, "//a", xmlGetAttr, 'href')
 print(links_url)
 
 # PREGUNTA 1.4 & 1.5
-#Numero de veces que aparece que aparece cada enlace
-link_counts <- table(links_url)
-
-#Crear data.frame
 tabla <- data.frame(links_text = character(),
+                    links_original_url = character(),
                     links_url = character(),
+                    links_relative = character(),
+                    links_internal = character(),
                     repeticiones = numeric(),
                     scraps = character(),
                     stringsAsFactors = FALSE)
@@ -67,40 +66,51 @@ tabla <- data.frame(links_text = character(),
 frecuencia <- table(links_url)
 
 for (i in 1:length(links_text)) {
-  Sys.sleep(4)
+  Sys.sleep(2)
   print("round done")
   tabla[i, "links_text"] <- links_text[i]
+  tabla[i, "links_original_url"] <- links_url[i]
   tabla[i, "links_url"] <- links_url[i]
+  tabla[i, "links_relative"] <- "N"
+  tabla[i, "links_internal"] <- "S"
   tabla[i, "repeticiones"] <- frecuencia[links_url[i]]
   
   #si inicia con /wiki/
   validation_wiki <- startsWith(links_url[i], "/wiki/")
   if(validation_wiki) {
     tabla[i, "links_url"] <- paste0("https://www.mediawiki.org", links_url[i])
+    tabla[i, "links_relative"] <- "S"
   }
   
   #si inicia con /https/
-  validation_wiki <- startsWith(links_url[i], "https:")
-  if(validation_wiki) {
-    tabla[i, "links_url"] <- paste0("", links_url[i])
+  validation_https <- startsWith(links_url[i], "https:")
+  if(validation_https) {
+    tabla[i, "links_url"] <- links_url[i]
+    validation_internal <- startsWith(links_url[i], "https://www.mediawiki.org")
+    if(!validation_internal) {
+      tabla[i, "links_internal"] <- "N"
+    }
   }
   
   #si inicia con //
-  validation_wiki <- startsWith(links_url[i], "//")
-  if(validation_wiki) {
+  validation_slash <- startsWith(links_url[i], "//")
+  if(validation_slash) {
     tabla[i, "links_url"] <- paste0("https:", links_url[i])
+    tabla[i, "links_relative"] <- "S"
   }
   
   #si inicia con /w/
-  validation_wiki <- startsWith(links_url[i], "/w/")
-  if(validation_wiki) {
+  validation_w <- startsWith(links_url[i], "/w/")
+  if(validation_w) {
     tabla[i, "links_url"] <- paste0("https://www.mediawiki.org", links_url[i])
+    tabla[i, "links_relative"] <- "S"
   }
   
   #si inicia con /#/
-  validation_wiki <- startsWith(links_url[i], "#")
-  if(validation_wiki) {
+  validation_hash <- startsWith(links_url[i], "#")
+  if(validation_hash) {
     tabla[i, "links_url"] <- paste0("https://www.mediawiki.org/wiki/MediaWiki", links_url[i])
+    tabla[i, "links_relative"] <- "S"
   }
   
   print(paste0("TEST> " , links_url[i]))
@@ -111,7 +121,7 @@ for (i in 1:length(links_text)) {
   print(code)
 }
 
-head(tabla)
+#tabla
 
 #PREGUNTA 2.1
 library(ggplot2)
