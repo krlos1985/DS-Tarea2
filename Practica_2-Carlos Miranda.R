@@ -2,6 +2,7 @@
 #Instalar las librerías: HTTR y XML
 #install.packages("httr")
 #install.packages("XML")
+#install.packages("ggpubr")
 
 #Cargar las librerías: HTTR y XML
 library(httr)
@@ -123,31 +124,88 @@ for (i in 1:length(links_text)) {
 
 #tabla
 
-#PREGUNTA 2.1
+#PREGUNTA 2.1 y 2.2
 library(ggplot2)
+library(ggpubr)
 
-# Añadimos una columna para indicar si la URL es absoluta o relativa
-tabla$tipo_url <- ifelse(grepl("^https?", tabla$links_url), "Absoluta", "Relativa")
+relative <- c(1, 2, 3, 4, 5, 4, 3, 2, 1)
+no_relative <- c(2, 4, 6, 8, 10, 8, 6, 4, 2)
 
-# Creamos el histograma usando ggplot2
-ggplot(tabla, aes(x=repeticiones)) + 
-  geom_histogram(aes(fill=tipo_url), 
-                 binwidth = 1, 
-                 position = "dodge") +
-  scale_fill_manual(values=c("#FF6666", "#66CCFF")) +
-  labs(x = "Frecuencia de aparición", y = "Número de enlaces") +
-  theme_minimal()
+tabla2 <- tabla[tabla$links_relative =="S", c("repeticiones")]
+tabla3 <- tabla[tabla$links_relative =="N", c("repeticiones")]
+tabla6 <- tabla[TRUE, c("links_internal")]
+tabla7 <- as.numeric(tabla[TRUE, c("scraps")])
+tabla7 <- (tabla[TRUE, c("scraps")])
 
-#PREGUNTA 2.2
-# Añadir columna de enlaces internos/externos
-tabla$interno <- ifelse(grepl("https://www.mediawiki.org", tabla$links_url), "Interno", "Externo")
+# Crear datos
+relative <- tabla2
+no_relative <- tabla3
 
-# Calcular suma de enlaces internos y externos
-suma_interno <- sum(tabla$repeticiones[tabla$interno == "Interno"], na.rm = TRUE)
-suma_externo <- sum(tabla$repeticiones[tabla$interno == "Externo"], na.rm = TRUE)
+# Crear el primer histograma
+p1 <- ggplot(data.frame(x=relative), aes(x=x)) + 
+  geom_histogram(aes(y=..count..), fill="blue", alpha=0.5) +
+  labs(title="Histograma de relative", x="Valores", y="Frecuencia") 
 
-# Generar gráfico de barras
-barplot(c(suma_interno, suma_externo), names.arg = c("Enlaces internos", "Enlaces externos"),
-        xlab = "Tipo de enlace", ylab = "Frecuencia", col = c("blue", "red"))
+# Crear el segundo histograma
+p2 <- ggplot(data.frame(x=no_relative), aes(x=x)) + 
+  geom_histogram(aes(y=..count..), fill="red", alpha=0.5) +
+  labs(title="Histograma de no-relative", x="Valores", y="Frecuencia")
+
+# Tercer histograma
+factor_tabla6 <- factor(tabla6, levels = c("S", "N"))
+
+# Crear un data frame con la columna "x"
+data <- data.frame(x = factor_tabla6)
+
+# Crear el histograma
+p3 <- ggplot(data, aes(x = x)) + 
+  geom_bar(aes(y=..count../sum(..count..)), fill="blue", alpha=0.5, stat = "count") +
+  labs(title="Histograma de tabla6", x="Valores", y="Frecuencia")
+
+# Ajustar la apariencia de los gráficos (opcional)
+theme_set(theme_classic())
+
+# Acomodar los gráficos en dos filas y una columna usando ggarrange()
+ggarrange(p1, p2, p3, ncol=1, heights=c(1,1,1.2))
 
 #PREGUNTA 2.3
+# Cargar las bibliotecas ggplot2 y ggpubr
+
+library(ggplot2)
+library(ggpubr)
+
+# Crear datos
+relative <- tabla2
+no_relative <- tabla3
+
+# Crear el primer histograma
+p1 <- ggplot(data.frame(x=relative), aes(x=x)) + 
+  geom_histogram(aes(y=..count..), fill="blue", alpha=0.5) +
+  labs(title="Histograma de relative", x="Valores", y="Frecuencia") 
+
+# Crear el segundo histograma
+p2 <- ggplot(data.frame(x=no_relative), aes(x=x)) + 
+  geom_histogram(aes(y=..count..), fill="red", alpha=0.5) +
+  labs(title="Histograma de no-relative", x="Valores", y="Frecuencia")
+
+# Tercer histograma
+factor_tabla6 <- factor(tabla6, levels = c("S", "N"))
+
+# Crear un data frame con la columna "x"
+data <- data.frame(x = factor_tabla6)
+
+# Crear el histograma
+p3 <- ggplot(data, aes(x = x)) + 
+  geom_bar(aes(y=..count../sum(..count..)), fill="blue", alpha=0.5, stat = "count") +
+  labs(title="Histograma de tabla6", x="Valores", y="Frecuencia")
+
+p4 <- ggplot(data.frame(x=tabla7), aes(x= "", fill = x)) + 
+  geom_bar(width = 1) + coord_polar(theta = "y") +
+  labs(title="status code")
+
+# Ajustar la apariencia de los gráficos (opcional)
+theme_set(theme_classic())
+
+# Acomodar los gráficos en dos filas y una columna usando ggarrange()
+ggarrange(p1, p2, p3, p4, ncol=1, heights=c(1,1,1,1.2))
+
